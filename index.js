@@ -25,7 +25,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     const Borders = client.db("Mess-Manager").collection("Borders")
-    const score = client.db("Mess-Manager").collection("Score")
+    const Cost = client.db("Mess-Manager").collection("Cost")
 
     app.post("/addborder", async (req, res) => {
       const border = req.body;
@@ -65,6 +65,34 @@ async function run() {
       const result = await Borders.updateOne(query, updateDocument);
       res.send(result);
 
+    })
+    app.post("/addcost", async (req, res) => {
+      const costData = req.body;
+      const result = await Cost.insertOne(costData)
+      res.send(result);
+      // console.log(costData)
+
+    })
+    app.get("/allcost", async (req, res) => {
+      const result = await Cost.find().toArray();
+      res.send(result);
+    })
+    app.get("/costone/:id", async (req, res) => {
+      const Id = req.params.id;
+      // console.log(Id)
+      let query = {};
+      if (Id) {
+        query = { _id: new ObjectId(Id) };
+      }
+      const result = await Cost.findOne(query);
+      res.send(result);
+    })
+    app.put("/costedit/:id", async (req, res) => {
+      const Id = req.params.id;
+      const query = { _id: new ObjectId(Id) };
+      const costData = await Cost.findOne(query ? query : {});
+
+      console.log(costData)
     })
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
