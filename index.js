@@ -42,6 +42,38 @@ async function run() {
       const result = await Borders.find(query).toArray()
       res.send(result);
     })
+    app.get("/bordercount", async(req,res) =>{
+      const count = await Borders.estimatedDocumentCount();
+      res.send({count});
+    })
+    app.get("/totalcost", async(req,res) =>{
+      let totalCost = 0;
+      const result = await Cost.find().toArray();
+      result.forEach(cost => totalCost += parseFloat(cost?.costAmount))
+      res.send(totalCost)
+    })
+    app.put("/costupdate/:id", async(req,res)=>{
+      const Id = req.params.id;
+      const cost = req.body;
+      const query = {_id: new ObjectId(Id)};
+      // const thisCost = await Cost.findOne(query);
+      // console.log(Id, cost,thisCost, cost);
+
+      const updateDocument = {
+        $set: {
+          product: cost.product,
+          costAmount: cost.costAmount,
+          modify: {
+            isModify: cost.isModify,
+            modifyPerson: cost.modifyPerson,
+            modifyTime: cost.modifyTime
+          }
+        }
+      }
+      const result = await Cost.updateOne(query, updateDocument);
+      res.send(result);
+
+    })
     app.delete("/deleteborder/:id", async (req, res) => {
       const id = req.params.id;
       // console.log(id);
