@@ -34,28 +34,72 @@ async function run() {
       res.send(result);
     })
     app.get("/allborders", async (req, res) => {
-      const name = req?.query?.name;
+      // const name = req?.query?.name;
+      const Creatoremail = req?.query?.creatoremail;
+      // console.log( "38", Creatoremail)
       let query = {}
-      if (name) {
-        query = { borderName: name }
+      if (Creatoremail) {
+        query = {
+          creatorEmail: Creatoremail
+        }
       }
       const result = await Borders.find(query).toArray()
       res.send(result);
     })
-    app.get("/bordercount", async(req,res) =>{
-      const count = await Borders.estimatedDocumentCount();
-      res.send({count});
+
+    app.get("/addmoneyspecific", async (req, res) => {
+      const userEmail = req.query?.useremail;
+      console.log(userEmail);
+      let filter = {};
+      let query = {}
+      if (userEmail) {
+        filter = { borderEmail: userEmail };
+      }
+      const result1 = await Borders.findOne(filter)
+      if (result1?.creatorEmail) {
+        query = { creatorEmail: result1?.creatorEmail }
+      }
+      const result = await Borders.find(query).toArray();
+      res.send(result);
+      // console.log(result1, result1?.creatorEmail);
     })
-    app.get("/totalcost", async(req,res) =>{
+
+    app.get("/crteatormess", async (req, res) => {
+      const creatoremail = req.query?.email;
+      let query = {}
+      if (creatoremail) {
+        query = {
+          creatorEmail: creatoremail,
+          role: "creator"
+        }
+      }
+      const result = await Borders.find(query).toArray();
+      res.send(result);
+    })
+    app.get("/borderone/:id", async (req, res) => {
+      const id = req.params.id;
+      // console.log(id);
+      let query = {};
+      if (id) {
+        query = { _id: new ObjectId(id) }
+      }
+      const result = await Borders.find(query).toArray();
+      res.send(result);
+    })
+    app.get("/bordercount", async (req, res) => {
+      const count = await Borders.estimatedDocumentCount();
+      res.send({ count });
+    })
+    app.get("/totalcost", async (req, res) => {
       let totalCost = 0;
       const result = await Cost.find().toArray();
       result.forEach(cost => totalCost += parseFloat(cost?.costAmount))
       res.send(totalCost)
     })
-    app.put("/costupdate/:id", async(req,res)=>{
+    app.put("/costupdate/:id", async (req, res) => {
       const Id = req.params.id;
       const cost = req.body;
-      const query = {_id: new ObjectId(Id)};
+      const query = { _id: new ObjectId(Id) };
       // const thisCost = await Cost.findOne(query);
       // console.log(Id, cost,thisCost, cost);
 
@@ -77,7 +121,10 @@ async function run() {
     app.delete("/deleteborder/:id", async (req, res) => {
       const id = req.params.id;
       // console.log(id);
-      const query = { _id: new ObjectId(id) };
+      let query = {}
+      if (id) {
+        query = { _id: new ObjectId(id) };
+      }
       const result = await Borders.deleteOne(query)
       res.send(result);
     })
