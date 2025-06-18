@@ -49,7 +49,7 @@ async function run() {
 
     app.get("/addmoneyspecific", async (req, res) => {
       const userEmail = req.query?.useremail;
-      console.log(userEmail);
+      // console.log(userEmail);
       let filter = {};
       let query = {}
       if (userEmail) {
@@ -147,14 +147,35 @@ async function run() {
     })
     app.post("/addcost", async (req, res) => {
       const costData = req.body;
-      const result = await Cost.insertOne(costData)
+      const BorderEmail = req.query?.borderUserEmail
+      // const borderemail = costData?.borderEmail; // same as BorderEmail
+      let filter = {}
+      if (BorderEmail) {
+        filter = { borderEmail: BorderEmail }
+      }
+      const result1 = await Borders.findOne(filter);
+      const creatorEmail = result1?.creatorEmail;
+      const newCostData = { ...costData, creatorEmail }
+      const result = await Cost.insertOne(newCostData)
       res.send(result);
-      // console.log(costData)
+      // console.log(costData, newCostData,BorderEmail)
 
     })
     app.get("/allcost", async (req, res) => {
-      const result = await Cost.find().toArray();
+      const bordermMail = req.query?.borderMail;
+      let filter = {};
+      let query = {}
+      if (bordermMail) {
+        filter = { borderEmail: bordermMail }
+      }
+      const result1 = await Cost.findOne(filter);
+      const creatorMail = result1?.creatorEmail;
+      if (creatorMail) {
+        query = { creatorEmail: creatorMail }
+      }
+      const result = await Cost.find(query).toArray();
       res.send(result);
+      // console.log(creatorMail,bordermMail, result1, result)
     })
     app.get("/costone/:id", async (req, res) => {
       const Id = req.params.id;
@@ -167,7 +188,7 @@ async function run() {
       res.send(result);
     })
     app.put("/costedit/:id", async (req, res) => {
-      const Id = req.params.id;
+      const Id = req.params?.id;
       const query = { _id: new ObjectId(Id) };
       const costData = await Cost.findOne(query ? query : {});
 
