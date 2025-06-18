@@ -87,7 +87,18 @@ async function run() {
       res.send(result);
     })
     app.get("/bordercount", async (req, res) => {
-      const count = await Borders.estimatedDocumentCount();
+      const userMail = req?.query?.borderMail;
+      let filter = {}
+      let query = {};
+      if (userMail) {
+        filter = { borderEmail: userMail }
+      }
+      const result1 = await Borders.findOne(filter);
+      const creatorMailOfUser = result1?.creatorEmail;
+      if (creatorMailOfUser) {
+        query = { creatorEmail: creatorMailOfUser }
+      }
+      const count = await Borders.countDocuments(query);
       res.send({ count });
     })
     app.get("/totalcost", async (req, res) => {
