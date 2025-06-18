@@ -56,9 +56,11 @@ async function run() {
         filter = { borderEmail: userEmail };
       }
       const result1 = await Borders.findOne(filter)
-      if (result1?.creatorEmail) {
-        query = { creatorEmail: result1?.creatorEmail }
+      const creatorMail = result1?.creatorEmail
+      if (!creatorMail) {
+        return res.send([])
       }
+      query = { creatorEmail: creatorMail }
       const result = await Borders.find(query).toArray();
       res.send(result);
       // console.log(result1, result1?.creatorEmail);
@@ -103,7 +105,19 @@ async function run() {
     })
     app.get("/totalcost", async (req, res) => {
       let totalCost = 0;
-      const result = await Cost.find().toArray();
+      const borderMail = req?.query?.userMail;
+      let filter = {}
+      let query = {}
+      if (borderMail) {
+        filter = { borderEmail: borderMail }
+      }
+      const result1 = await Cost.findOne(filter);
+      const creatorMailOfUser = result1?.creatorEmail;
+      if (creatorMailOfUser) {
+        query = { creatorEmail: creatorMailOfUser }
+      }
+      // console.log(borderMail,creatorMailOfUser, result1);
+      const result = await Cost.find(query).toArray();
       result.forEach(cost => totalCost += parseFloat(cost?.costAmount))
       res.send(totalCost)
     })
@@ -138,6 +152,23 @@ async function run() {
       }
       const result = await Borders.deleteOne(query)
       res.send(result);
+    })
+    app.delete("/deletemess/:id", async (req, res) => {
+      const Id = req.params.id;
+      let query = {};
+      let filter = {};
+      if (Id) {
+        query = { _id: new ObjectId(Id) }
+      }
+      const result1 = await Borders.findOne(query);
+      const creatorMail = result1?.creatorEmail;
+      if (creatorMail) {
+        filter = { creatorEmail: creatorMail }
+      }
+      const result = await Borders.deleteMany(filter)
+      const result2 = await Cost.deleteMany(filter)
+      res.send(result);
+      console.log(result, result2);
     })
 
     app.put("/addblance/:id", async (req, res) => {
@@ -174,19 +205,20 @@ async function run() {
     })
     app.get("/allcost", async (req, res) => {
       const bordermMail = req.query?.borderMail;
+      console.log(bordermMail);
       let filter = {};
       let query = {}
       if (bordermMail) {
         filter = { borderEmail: bordermMail }
       }
       const result1 = await Cost.findOne(filter);
-      const creatorMail = result1?.creatorEmail;
-      if (creatorMail) {
-        query = { creatorEmail: creatorMail }
+      const creatorMail = result1?.creatorEmail || "";
+      if (!creatorMail) {
+        return res.send([])
       }
+      query = { creatorEmail: creatorMail }
       const result = await Cost.find(query).toArray();
       res.send(result);
-      // console.log(creatorMail,bordermMail, result1, result)
     })
     app.get("/costone/:id", async (req, res) => {
       const Id = req.params.id;
