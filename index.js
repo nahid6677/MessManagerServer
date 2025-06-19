@@ -168,7 +168,7 @@ async function run() {
       const result = await Borders.deleteMany(filter)
       const result2 = await Cost.deleteMany(filter)
       res.send(result);
-      console.log(result, result2);
+      // console.log(result, result2);
     })
 
     app.put("/addblance/:id", async (req, res) => {
@@ -189,7 +189,7 @@ async function run() {
     })
     app.post("/addcost", async (req, res) => {
       const costData = req.body;
-      const BorderEmail = req.query?.borderUserEmail
+      const BorderEmail = req.query?.borderUserEmail;
       // const borderemail = costData?.borderEmail; // same as BorderEmail
       let filter = {}
       if (BorderEmail) {
@@ -230,13 +230,13 @@ async function run() {
       const result = await Cost.findOne(query);
       res.send(result);
     })
-    app.put("/costedit/:id", async (req, res) => {
-      const Id = req.params?.id;
-      const query = { _id: new ObjectId(Id) };
-      const costData = await Cost.findOne(query ? query : {});
+    // app.put("/costedit/:id", async (req, res) => {
+    //   const Id = req.params?.id;
+    //   const query = { _id: new ObjectId(Id) };
+    //   const costData = await Cost.findOne(query ? query : {});
 
-      console.log(costData)
-    })
+    //   // console.log(costData)
+    // })
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
