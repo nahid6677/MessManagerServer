@@ -27,11 +27,41 @@ async function run() {
     const Borders = client.db("Mess-Manager").collection("Borders")
     const Cost = client.db("Mess-Manager").collection("Cost")
 
-    app.post("/addborder", async (req, res) => {
+    app.post("/addmess", async (req, res) => {
       const border = req.body;
       // console.log(border);
-      const result = await Borders.insertOne(border)
-      res.send(result);
+      const creatorMail = border?.creatorEmail;
+      if (creatorMail) {
+        const query = {
+          creatorEmail: creatorMail,
+          role: "creator"
+        };
+        const result1 = await Borders.findOne(query);
+        if (result1?.creatorEmail === creatorMail && result1?.role === "creator") {
+          res.send({ creator: "Already exsist a mess" })
+        } else {
+          const result = await Borders.insertOne(border)
+          res.send(result);
+        }
+      } else {
+        return 0
+      }
+
+    })
+    app.post("/addborder", async (req, res) => {
+      const border = req.body;
+      if (border) {
+        const borderMail = border?.borderEmail;
+        // console.log(borderMail);
+        const query = { borderEmail: borderMail };
+        const result1 = await Borders.findOne(query);
+        if (result1?.borderEmail === borderMail) {
+          return res.send({ thisBorder: "Already add one mess" })
+        } else {
+          const result = await Borders.insertOne(border);
+          res.send(result)
+        }
+      }
     })
     app.get("/allborders", async (req, res) => {
       // const name = req?.query?.name;
